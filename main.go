@@ -21,7 +21,8 @@ func main() {
 	http.HandleFunc("/join-room", handlers_.JoinRoom)
 	http.HandleFunc("/generate-token", handlers_.GenerateToken)
 	http.HandleFunc("/upload-image", handlers_.UploadImage)
-
+	http.HandleFunc("/upload", handlers_.UploadFileHandler)
+	http.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads"))))
 	http.HandleFunc("/ws", handlers_.HandleConnections)
 
 	go handlers_.HandleMessages()

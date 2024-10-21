@@ -4,8 +4,10 @@ import (
 	"chat-go/models"
 	"chat-go/services"
 	"context"
+	"io"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/websocket"
 	"go.mongodb.org/mongo-driver/bson"
@@ -50,13 +52,61 @@ func HandleConnections(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		err = services.SaveMessage(msg)
-		if err != nil {
-			log.Printf("Erro ao salvar a mensagem: %v", err)
+		if msg.ImageURL != "" || msg.FileURL != "" {
+			err = services.SaveMessage(msg)
+			if err != nil {
+				log.Printf("Erro ao salvar a mensagem: %v", err)
+			}
 		}
 
 		broadcast <- msg
 	}
+}
+
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Content-Type")
+}
+
+func UploadFileHandler(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
+
+	if r.Method == "OPTIONS" {
+		return
+	}
+
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		http.Error(w, "Erro ao fazer upload do arquivo", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	filename := header.Filename
+	filepath := "uploads/" + filename
+
+	err = os.MkdirAll("uploads", os.ModePerm)
+	if err != nil {
+		http.Error(w, "Erro ao criar diretório de upload", http.StatusInternalServerError)
+		return
+	}
+
+	out, err := os.Create(filepath)
+	if err != nil {
+		http.Error(w, "Erro ao salvar o arquivo", http.StatusInternalServerError)
+		return
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, file)
+	if err != nil {
+		http.Error(w, "Erro ao copiar o arquivo", http.StatusInternalServerError)
+		return
+	}
+
+	fileURL := "http://localhost:7120/uploads/" + filename
+	w.Write([]byte(fileURL))
 }
 
 func HandleMessages() {

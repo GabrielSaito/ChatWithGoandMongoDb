@@ -18,6 +18,7 @@ type Message struct {
 	Room     string `json:"room"`
 	ImageURL string `json:"image_url,omitempty"`
 	UserID   string `json:"user_id"`
+	FileURL  string `json:"file_url,omitempty"`
 }
 
 type User struct {

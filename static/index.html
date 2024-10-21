@@ -4,32 +4,124 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat App</title>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #1a1a1a; 
+        }
+        .chat-container {
+            height: 60vh; 
+            overflow-y: auto;
+            background-color: rgba(30, 30, 30, 0.9); 
+            border-radius: 12px;
+            padding: 10px; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); 
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 80%;
+            word-wrap: break-word; 
+        }
+        .sent {
+            background-color: rgba(255, 255, 255, 0.2); 
+            margin-left: auto;
+            color: white;
+        }
+        .received {
+            background-color: rgba(70, 70, 70, 0.7); 
+            margin-right: auto;
+            color: white;
+        }
+        .input-container {
+            background-color: rgba(40, 40, 40, 0.8); 
+            border-radius: 8px;
+            padding: 5px; 
+        }
+        input, button {
+            border-radius: 6px;
+        }
+        button {
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: rgba(0, 123, 255, 0.8);
+        }
+        @media (max-width: 640px) {
+            .chat-container {
+                height: 50vh; 
+                padding: 8px; 
+            }
+            .message {
+                max-width: 90%; 
+            }
+            input[type="text"], input[type="password"] {
+                font-size: 14px; 
+            }
+            button {
+                font-size: 14px; 
+            }
+            .input-container {
+                flex-direction: column; 
+                align-items: stretch; 
+            }
+        }
+    </style>
 </head>
-<body>
-    <div id="app">
-        <h1>Chat App</h1>
+<body class="flex items-center justify-center h-screen">
+    <div id="app" class="bg-gray-800 bg-opacity-80 p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-lg">
+        <h1 class="text-3xl font-bold mb-6 text-center text-blue-400">Chat abluble</h1>
         
-        <div id="room-creation">
-            <h2>Criar Sala</h2>
-            <input type="text" id="room-name" placeholder="Nome da Sala">
-            <input type="password" id="room-password" placeholder="Senha (opcional)">
-            <button onclick="createRoom()">Criar Sala</button>
+        <div id="room-creation" class="mb-4">
+            <h2 class="text-lg font-semibold mb-2 text-white">Criar Sala</h2>
+            <input type="text" id="user-name" placeholder="Seu Nome" class="border border-gray-600 bg-gray-700 text-white p-2 mb-2 w-full rounded">
+            <input type="text" id="room-name" placeholder="Nome da Sala" class="border border-gray-600 bg-gray-700 text-white p-2 mb-2 w-full rounded">
+            <input type="password" id="room-password" placeholder="Senha (opcional)" class="border border-gray-600 bg-gray-700 text-white p-2 mb-4 w-full rounded">
+            <button onclick="createRoom()" class="bg-blue-500 text-white p-2 rounded w-full hover:bg-blue-600">Criar Sala</button>
         </div>
-
-        <div id="room-join">
-            <h2>Entrar na Sala</h2>
-            <input type="text" id="join-room-id" placeholder="ID da Sala">
-            <input type="password" id="join-room-password" placeholder="Senha">
-            <button onclick="joinRoom()">Entrar</button>
+        
+        <div id="room-join" class="mb-4">
+            <h2 class="text-lg font-semibold mb-2 text-white">Entrar na Sala</h2>
+            <input type="text" id="join-user-name" placeholder="Seu Nome" class="border border-gray-600 bg-gray-700 text-white p-2 mb-2 w-full rounded">
+            <input type="text" id="join-room-id" placeholder="ID da Sala" class="border border-gray-600 bg-gray-700 text-white p-2 mb-2 w-full rounded">
+            <input type="password" id="join-room-password" placeholder="Senha" class="border border-gray-600 bg-gray-700 text-white p-2 mb-4 w-full rounded">
+            <button onclick="joinRoom()" class="bg-blue-500 text-white p-2 rounded w-full hover:bg-blue-600">Entrar</button>
         </div>
 
         <div id="chat" style="display: none;">
-            <h2>Chat - <span id="current-room-name"></span></h2>
-            <div id="messages" style="border: 1px solid #000; height: 300px; overflow-y: scroll;"></div>
-            <input type="text" id="message-input" placeholder="Digite sua mensagem">
-            <button onclick="sendMessage()">Enviar</button>
+            <h2 class="text-lg font-semibold mb-2 text-white">Chat - <span id="current-room-name"></span></h2>
+            <div id="messages" class="chat-container mb-2"></div>
+            <div class="flex flex-col input-container">
+                <div class="flex items-center w-full">
+                    <label for="file-upload" class="bg-gray-600 text-gray-300 p-1 rounded cursor-pointer hover:bg-gray-500 transition duration-200 mr-2">
+                        🔗  
+                    </label>
+                    <input 
+                        type="file" 
+                        id="file-upload" 
+                        class="hidden" 
+                        aria-label="Enviar arquivo"
+                        onchange="sendFile()"
+                    >
+                    <input 
+                        type="text" 
+                        id="message-input" 
+                        placeholder="Digite sua mensagem" 
+                        class="border border-gray-600 bg-gray-700 text-white rounded p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 mr-2 flex-grow" >
+                       
+                 
+                    <button 
+                        onclick="sendMessage()" 
+                        class="bg-blue-500 text-white p-1 rounded hover:bg-blue-200 transition duration-200 w-16">
+                       
+                        ➡️
+                    </button>
+                </div>
+            </div>
+            
         </div>
+        
     </div>
     
     <script src="script.js"></script>
